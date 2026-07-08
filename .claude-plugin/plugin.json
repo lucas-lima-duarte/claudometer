@@ -1,0 +1,11 @@
+{
+  "name": "claudometer",
+  "description": "A time-paced rate-limit statusline for Claude Code. Segmented 5-hour and 7-day usage bars that show whether you're ahead, on pace, or burning your quota too fast for where you are in the window.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Lucas Duarte"
+  },
+  "homepage": "https://github.com/lucas-lima-duarte/claudometer",
+  "repository": "https://github.com/lucas-lima-duarte/claudometer",
+  "license": "MIT"
+}
