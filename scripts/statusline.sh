@@ -1,6 +1,26 @@
 #!/bin/bash
 input=$(cat)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer A — Config (all optional env vars; sane defaults == MVP behavior)
+#   CLAUDOMETER_LANG   en | pt              (fallback: $LANG prefix; default en)
+#   CLAUDOMETER_THEME  fuel | mono | neon                       (default fuel)
+#   CLAUDOMETER_STYLE  segmented | blocks | compact             (default segmented)
+# Invalid values fall back to the default.
+# ─────────────────────────────────────────────────────────────────────────────
+_lang_raw="${CLAUDOMETER_LANG:-}"
+if [ -z "$_lang_raw" ]; then
+  case "$LANG" in pt*|PT*) _lang_raw=pt ;; *) _lang_raw=en ;; esac
+fi
+case "$_lang_raw" in pt) LANG_SEL=pt ;; *) LANG_SEL=en ;; esac
+case "${CLAUDOMETER_THEME:-fuel}"      in mono) THEME=mono ;; neon) THEME=neon ;; *) THEME=fuel ;; esac
+case "${CLAUDOMETER_STYLE:-segmented}" in blocks) STYLE=blocks ;; compact) STYLE=compact ;; *) STYLE=segmented ;; esac
+# Bar glyphs per style (segmented default == MVP). blocks = solid gauge, no dividers.
+case "$STYLE" in
+  blocks) BAR_FILL='█'; BAR_DIM='░'; BAR_DIV='' ;;
+  *)      BAR_FILL='━'; BAR_DIM='─'; BAR_DIV='▪' ;;
+esac
+
 # Portable epoch->string formatter.
 # macOS/BSD uses `date -r <epoch>`; Linux/WSL (GNU) uses `date -d @<epoch>`.
 # Try BSD form first, fall back to GNU — works on both without detecting the OS.
@@ -8,18 +28,62 @@ fmt_epoch() {
   date -r "$1" "$2" 2>/dev/null || date -d "@$1" "$2" 2>/dev/null
 }
 
-# Colors
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer B — Colors. Structural styles are theme-independent; the state palette
+# (ahead / on-pace / behind, base + bright) is set per theme. Variable NAMES are
+# kept so pct_color*/build_bar_segs read them unchanged. fuel == the MVP literals.
+#   GREEN/GREEN_BRIGHT = ahead   MODEL_COLOR/ORANGE_BRIGHT = on-pace
+#   RED/SALMON = behind          ORANGE = bar labels
+# ─────────────────────────────────────────────────────────────────────────────
 CYAN='\033[36m'
-GREEN='\033[32m'
-GREEN_BRIGHT='\033[38;5;120m'
-ORANGE='\033[38;5;214m'
-ORANGE_BRIGHT='\033[38;5;215m'
-MODEL_COLOR='\033[38;5;208m'
-RED='\033[31m'
 DIM='\033[2m'
 BOLD='\033[1m'
 RESET='\033[0m'
 ACTIVE_DIM_GRAY='\033[2;37m'
+case "$THEME" in
+  neon)
+    GREEN='\033[38;5;51m';   GREEN_BRIGHT='\033[38;5;87m'         # ahead  (cyan)
+    MODEL_COLOR='\033[38;5;201m'; ORANGE_BRIGHT='\033[38;5;207m'  # on-pace (magenta)
+    RED='\033[38;5;198m';    SALMON='\033[38;5;211m'             # behind (hot pink)
+    ORANGE='\033[38;5;201m'                                       # bar labels
+    ;;
+  mono)
+    GREEN='\033[38;5;250m';  GREEN_BRIGHT='\033[38;5;255m'        # ahead  (light gray)
+    MODEL_COLOR='\033[38;5;245m'; ORANGE_BRIGHT='\033[38;5;250m'  # on-pace (mid gray)
+    RED='\033[38;5;214m';    SALMON='\033[38;5;215m'             # behind (amber — only live hue)
+    ORANGE='\033[38;5;245m'                                       # bar labels
+    ;;
+  *)  # fuel (default) — MUST equal the MVP literals (G0 non-regression)
+    GREEN='\033[32m';        GREEN_BRIGHT='\033[38;5;120m'
+    MODEL_COLOR='\033[38;5;208m'; ORANGE_BRIGHT='\033[38;5;215m'
+    RED='\033[31m';          SALMON='\033[38;5;210m'
+    ORANGE='\033[38;5;214m'
+    ;;
+esac
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer C — i18n. bash 3.2 has no associative arrays → case only.
+# Model names (Sonnet/Haiku) are never translated. Labels must fit 7 columns
+# to keep the %-7s alignment (see UTF-8 note in README).
+# ─────────────────────────────────────────────────────────────────────────────
+t() {
+  case "$LANG_SEL" in
+    pt)
+      case "$1" in
+        boost) echo "acelera" ;; hold) echo "segura" ;; save) echo "economiza" ;;
+        lbl_session) echo "Sessão" ;; lbl_5h) echo "5 horas" ;; lbl_weekly) echo "Semana" ;;
+        tag_week) echo "semana" ;; tag_5h) echo "5h" ;;
+        effort) echo "effort" ;;
+      esac ;;
+    *)
+      case "$1" in
+        boost) echo "boost it" ;; hold) echo "hold it" ;; save) echo "save it" ;;
+        lbl_session) echo "Session" ;; lbl_5h) echo "5-hour" ;; lbl_weekly) echo "Weekly" ;;
+        tag_week) echo "week" ;; tag_5h) echo "5h" ;;
+        effort) echo "effort" ;;
+      esac ;;
+  esac
+}
 
 # Current dir — basename only, like robbyrussell theme
 CWD_FULL=$(echo "$input" | jq -r '.cwd // .workspace.current_dir // empty')
@@ -56,8 +120,8 @@ pct_color_bright() {
   elif [ "$pct" -lt 75 ]; then
     echo "$ORANGE_BRIGHT"
   else
-    # Red state: luminous light-salmon (256-color) — stands out more than plain 91m
-    echo '\033[38;5;210m'
+    # Behind-pace bright (salmon in fuel / amber in mono / hot-pink in neon)
+    echo "$SALMON"
   fi
 }
 
@@ -100,22 +164,22 @@ pct_color_bright_paced() {
   elif [ "$pct" -le "$ceil" ]; then
     echo "$ORANGE_BRIGHT"
   else
-    echo '\033[38;5;210m'
+    echo "$SALMON"
   fi
 }
 
-# Build a bar made of N_SEGS segments, each SEG_W blocks wide, separated by single spaces.
-# Total visual width = N_SEGS * SEG_W + (N_SEGS - 1) gaps.
-# Bars are sized for horizontal/series layout on a single line (~109 visible chars total):
+# Build a bar of N_SEGS segments, each SEG_W blocks wide, with a 1-column divider
+# between segments. Sizes used here:
 #   Session: 1 seg  x 24 blocks           = 24
 #   5-hour:  5 segs x  4 blocks + 4 gaps  = 24
 #   Weekly:  7 segs x  4 blocks + 6 gaps  = 34
 #
-# Usage: build_bar_segs <pct> <n_segs> <seg_w> [active_seg_idx] [bar_color_bright] [filled_char] [dim_char]
-# active_seg_idx:  0-based index of current segment to highlight (-1 = none)
-# bar_color_bright: bright/bold variant of BAR_COLOR used when active seg is filled
-# filled_char:     character for filled blocks (default ━)
-# dim_char:        character for empty/dim blocks (default ─)
+# Usage: build_bar_segs <pct> <n_segs> <seg_w> [active_seg] [bright] [filled] [dim] [color_override] [divider]
+# active_seg:      0-based index of current segment to highlight (-1 = none)
+# bright:          bright/bold color used on the active filled block
+# filled / dim:    glyphs for filled / empty blocks (default ━ / ─)
+# color_override:  force the bar's base color (else derived from pct)
+# divider:         glyph between segments (default ▪; '' = none, for the blocks style)
 #
 # 4-state scheme per block:
 #   non-active + filled  → BAR_COLOR       filled_char
@@ -131,6 +195,7 @@ build_bar_segs() {
   local filled_char=${6:-━}
   local dim_char=${7:-─}
   local BAR_COLOR_OVERRIDE=${8:-}
+  local divider_char=${9-▪}   # unset → default ▪; explicit '' (blocks) → no divider
   local total_blocks=$(( n_segs * seg_w ))
   local filled=$(( pct * total_blocks / 100 ))
   local BAR_COLOR
@@ -144,9 +209,9 @@ build_bar_segs() {
   local blocks_drawn=0
   local seg=0
   while [ $seg -lt $n_segs ]; do
-    # Gap between segments — small gray square, 1 column
-    if [ $seg -gt 0 ]; then
-      bar="${bar}\033[90m▪\033[0m"
+    # Gap between segments — divider glyph, 1 column (empty divider = blocks style)
+    if [ $seg -gt 0 ] && [ -n "$divider_char" ]; then
+      bar="${bar}\033[90m${divider_char}\033[0m"
     fi
     local b=0
     while [ $b -lt $seg_w ]; do
@@ -172,78 +237,188 @@ build_bar_segs() {
   printf '%b' "$bar"
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer D — Pace / pedal (pure functions).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# active_segment <reset_epoch> <window_seconds> <n_segs>
+#   → 0-based index of the current time segment, clamped [0, n-1]; -1 if no usable
+#     time data (empty reset, or now < window_start). Replaces the old inline calc.
+active_segment() {
+  local reset=$1 window=$2 n=$3 now win_start elapsed seg
+  [ -z "$reset" ] && { echo -1; return; }
+  now=$(date +%s)
+  win_start=$(( reset - window ))
+  elapsed=$(( now - win_start ))
+  [ "$elapsed" -lt 0 ] && { echo -1; return; }
+  seg=$(( elapsed / (window / n) ))
+  [ "$seg" -gt $(( n - 1 )) ] && seg=$(( n - 1 ))
+  echo "$seg"
+}
+
+# pace_state <pct> <n_segs> <active_seg> → boost | hold | save
+#   KEEP THE THRESHOLDS IN SYNC WITH pct_color_paced (same floor/ceil math) so the
+#   pedal never contradicts the bar color of the same window.
+pace_state() {
+  local pct=$1 n=$2 seg=$3 floor ceil
+  if [ "$seg" -lt 0 ]; then
+    if   [ "$pct" -lt 50 ]; then echo boost
+    elif [ "$pct" -lt 75 ]; then echo hold
+    else echo save; fi
+    return
+  fi
+  floor=$(( seg * 100 / n ))
+  ceil=$(( (seg + 1) * 100 / n ))
+  if   [ "$pct" -lt "$floor" ]; then echo boost
+  elif [ "$pct" -le "$ceil" ]; then echo hold
+  else echo save; fi
+}
+
+# pace_severity <state> → 0 boost / 1 hold / 2 save   (for picking the winner)
+pace_severity() {
+  case "$1" in boost) echo 0 ;; hold) echo 1 ;; save) echo 2 ;; *) echo -1 ;; esac
+}
+
+# downgrade_target <model_display_name> → Sonnet | Haiku | /compact
+#   Biggest quota saving first; contextual to the current model.
+downgrade_target() {
+  case "$1" in
+    *Opus*)   echo "Sonnet" ;;
+    *Sonnet*) echo "Haiku" ;;
+    *Haiku*)  echo "/compact" ;;
+    *)        echo "/compact" ;;
+  esac
+}
+
+# pedal_render <state> <conflict_tag> <model>
+#   Emits (via %b): "● ● ●  <word>[ · <tag>][ → <target>]"
+#   The dot at the state's position lights in the state's bright color; the other
+#   two are DIM. Word in the state color. Tag (dim) only on conflict; action (dim,
+#   " → model") only on save.
+pedal_render() {
+  local state=$1 tag=$2 model=$3 d1="$DIM" d2="$DIM" d3="$DIM" wc="$DIM" out
+  case "$state" in
+    boost) d1="$GREEN_BRIGHT";  wc="$GREEN_BRIGHT" ;;
+    hold)  d2="$ORANGE_BRIGHT"; wc="$ORANGE_BRIGHT" ;;
+    save)  d3="$SALMON";        wc="$SALMON" ;;
+  esac
+  out="${d1}●${RESET} ${d2}●${RESET} ${d3}●${RESET}  ${BOLD}${wc}$(t "$state")${RESET}"
+  [ -n "$tag" ] && out="${out} ${DIM}· ${tag}${RESET}"
+  [ "$state" = "save" ] && out="${out} ${DIM}→ $(downgrade_target "$model")${RESET}"
+  printf '%b' "$out"
+}
+
+# render_compact — one-line layout (STYLE=compact). Omits the Session bar for a
+# minimal footprint; shows folder, model, the pedal, and 5h/7d percentages.
+render_compact() {
+  printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
+  [ -n "$MODEL" ]     && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
+  [ -n "$PEDAL_STR" ] && printf "  %b" "$PEDAL_STR"
+  [ -n "$FIVE_H" ]    && printf "   ${DIM}5h${RESET} %b%s%%${RESET}" "$FIVE_COLOR" "$FIVE_H"
+  [ -n "$SEVEN_D" ]   && printf "  ${DIM}7d${RESET} %b%s%%${RESET}" "$SEVEN_COLOR" "$SEVEN_D"
+  printf "\n"
+}
+
 # Rate limits
 FIVE_HOUR_PCT=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 FIVE_HOUR_RESET=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 SEVEN_DAY_PCT=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 SEVEN_DAY_RESET=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
-# Line 1: folder + model + effort
-printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
-[ -n "$MODEL" ] && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
-[ -n "$EFFORT" ] && printf "  ${BOLD}${MODEL_COLOR}%s effort${RESET}" "$EFFORT"
-printf "\n"
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer E — Early pace compute (the pedal must be ready before line 1 prints).
+# Also produces FIVE_H/SEVEN_D/FIVE_ACTIVE_SEG/SEVEN_ACTIVE_SEG reused by the bars.
+# ─────────────────────────────────────────────────────────────────────────────
+FIVE_H=""; SEVEN_D=""
+FIVE_ACTIVE_SEG=-1; SEVEN_ACTIVE_SEG=-1
+FIVE_STATE=""; SEVEN_STATE=""
+if [ -n "$FIVE_HOUR_PCT" ]; then
+  FIVE_H=$(echo "$FIVE_HOUR_PCT" | cut -d. -f1)
+  FIVE_ACTIVE_SEG=$(active_segment "$FIVE_HOUR_RESET" 18000 5)
+  FIVE_STATE=$(pace_state "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
+fi
+if [ -n "$SEVEN_DAY_PCT" ]; then
+  SEVEN_D=$(echo "$SEVEN_DAY_PCT" | cut -d. -f1)
+  SEVEN_ACTIVE_SEG=$(active_segment "$SEVEN_DAY_RESET" 604800 7)
+  SEVEN_STATE=$(pace_state "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
+fi
+
+# Synthesize one pedal from both windows: the more severe window wins; a dim tag
+# names the winning window only when the two disagree.
+PEDAL_STR=""
+_ped_state=""; _ped_tag=""
+if [ -n "$FIVE_STATE" ] && [ -n "$SEVEN_STATE" ]; then
+  if [ "$(pace_severity "$SEVEN_STATE")" -ge "$(pace_severity "$FIVE_STATE")" ]; then
+    _ped_state="$SEVEN_STATE"; _ped_win=week
+  else
+    _ped_state="$FIVE_STATE";  _ped_win=5h
+  fi
+  if [ "$FIVE_STATE" != "$SEVEN_STATE" ]; then
+    [ "$_ped_win" = week ] && _ped_tag=$(t tag_week) || _ped_tag=$(t tag_5h)
+  fi
+elif [ -n "$FIVE_STATE" ]; then
+  _ped_state="$FIVE_STATE"
+elif [ -n "$SEVEN_STATE" ]; then
+  _ped_state="$SEVEN_STATE"
+fi
+[ -n "$_ped_state" ] && PEDAL_STR=$(pedal_render "$_ped_state" "$_ped_tag" "$MODEL")
+
+# Line 1: folder + model + effort + pedal (stacked styles; compact renders separately)
+if [ "$STYLE" != "compact" ]; then
+  printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
+  [ -n "$MODEL" ] && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
+  [ -n "$EFFORT" ] && printf "  ${BOLD}${MODEL_COLOR}%s $(t effort)${RESET}" "$EFFORT"
+  [ -n "$PEDAL_STR" ] && printf "   %b" "$PEDAL_STR"
+  printf "\n"
+fi
 
 # Build segment: Session (1 seg x 24 blocks = 24 visual)
 CTX_COLOR=$(pct_color "$CTX_PCT")
-CTX_BAR=$(build_bar_segs "$CTX_PCT" 1 24)
-SESSION_SEG=$(printf "\033[38;5;214m%-7s\033[0m %b %b%3s%%\033[0m" \
-  "Session" "$CTX_BAR" "$CTX_COLOR" "$CTX_PCT")
+CTX_BAR=$(build_bar_segs "$CTX_PCT" 1 24 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM")
+SESSION_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m" \
+  "$(t lbl_session)" "$CTX_BAR" "$CTX_COLOR" "$CTX_PCT")
 
 # Build segment: 5-hour (5 segs x 4 blocks + 4 gaps = 24 visual)
 FIVE_SEG=""
 if [ -n "$FIVE_HOUR_PCT" ]; then
-  FIVE_H=$(echo "$FIVE_HOUR_PCT" | cut -d. -f1)
+  # FIVE_H / FIVE_ACTIVE_SEG already computed in Layer E.
   FIVE_RESET_STR=""
-  FIVE_ACTIVE_SEG=-1
   if [ -n "$FIVE_HOUR_RESET" ]; then
     _fdate=$(fmt_epoch "$FIVE_HOUR_RESET" "+%H:%M")
     [ -n "$_fdate" ] && FIVE_RESET_STR=$(printf " \033[2m%s\033[0m" "$_fdate")
-    # Window started 5h before reset; active seg = floor((now - start) / 3600), clamped 0-4
-    NOW_TS=$(date +%s)
-    FIVE_WIN_START=$(( FIVE_HOUR_RESET - 5 * 3600 ))
-    FIVE_ELAPSED=$(( NOW_TS - FIVE_WIN_START ))
-    if [ "$FIVE_ELAPSED" -ge 0 ]; then
-      FIVE_ACTIVE_SEG=$(( FIVE_ELAPSED / 3600 ))
-      [ "$FIVE_ACTIVE_SEG" -gt 4 ] && FIVE_ACTIVE_SEG=4
-    fi
   fi
   FIVE_COLOR=$(pct_color_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
   FIVE_COLOR_BRIGHT=$(pct_color_bright_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
-  FIVE_BAR=$(build_bar_segs "$FIVE_H" 5 4 "$FIVE_ACTIVE_SEG" "$FIVE_COLOR_BRIGHT" ━ ─ "$FIVE_COLOR")
-  FIVE_SEG=$(printf "\033[38;5;214m%-7s\033[0m %b %b%3s%%\033[0m%s" \
-    "5-hour" "$FIVE_BAR" "$FIVE_COLOR" "$FIVE_H" "$FIVE_RESET_STR")
+  FIVE_BAR=$(build_bar_segs "$FIVE_H" 5 4 "$FIVE_ACTIVE_SEG" "$FIVE_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR" "$BAR_DIV")
+  FIVE_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m%s" \
+    "$(t lbl_5h)" "$FIVE_BAR" "$FIVE_COLOR" "$FIVE_H" "$FIVE_RESET_STR")
 fi
 
 # Build segment: Weekly (7 segs x 4 blocks + 6 gaps = 34 visual)
 SEVEN_SEG=""
 if [ -n "$SEVEN_DAY_PCT" ]; then
-  SEVEN_D=$(echo "$SEVEN_DAY_PCT" | cut -d. -f1)
+  # SEVEN_D / SEVEN_ACTIVE_SEG already computed in Layer E.
   SEVEN_RESET_STR=""
-  SEVEN_ACTIVE_SEG=-1
   if [ -n "$SEVEN_DAY_RESET" ]; then
     _sdate=$(fmt_epoch "$SEVEN_DAY_RESET" "+%a %d %b")
     [ -n "$_sdate" ] && SEVEN_RESET_STR=$(printf " \033[2m%s\033[0m" "$_sdate")
-    # Window started 7 days before reset; active seg = floor((now - start) / 86400), clamped 0-6
-    NOW_TS=$(date +%s)
-    SEVEN_WIN_START=$(( SEVEN_DAY_RESET - 7 * 86400 ))
-    SEVEN_ELAPSED=$(( NOW_TS - SEVEN_WIN_START ))
-    if [ "$SEVEN_ELAPSED" -ge 0 ]; then
-      SEVEN_ACTIVE_SEG=$(( SEVEN_ELAPSED / 86400 ))
-      [ "$SEVEN_ACTIVE_SEG" -gt 6 ] && SEVEN_ACTIVE_SEG=6
-    fi
   fi
   SEVEN_COLOR=$(pct_color_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
   SEVEN_COLOR_BRIGHT=$(pct_color_bright_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
-  SEVEN_BAR=$(build_bar_segs "$SEVEN_D" 7 4 "$SEVEN_ACTIVE_SEG" "$SEVEN_COLOR_BRIGHT" ━ ─ "$SEVEN_COLOR")
-  SEVEN_SEG=$(printf "\033[38;5;214m%-7s\033[0m %b %b%3s%%\033[0m%s" \
-    "Weekly" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
+  SEVEN_BAR=$(build_bar_segs "$SEVEN_D" 7 4 "$SEVEN_ACTIVE_SEG" "$SEVEN_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$SEVEN_COLOR" "$BAR_DIV")
+  SEVEN_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m%s" \
+    "$(t lbl_weekly)" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
 fi
 
-# Lines 2+: each bar on its own line (stacked vertically)
-printf '%s\n' "$SESSION_SEG"
-[ -n "$FIVE_SEG" ]  && printf '%s\n' "$FIVE_SEG"
-[ -n "$SEVEN_SEG" ] && printf '%s\n' "$SEVEN_SEG"
+# Layer F — output per style. segmented/blocks share the stacked layout (bar glyphs
+# already differ via BAR_FILL/BAR_DIM/BAR_DIV); compact is a single line.
+if [ "$STYLE" = "compact" ]; then
+  render_compact
+else
+  printf '%s\n' "$SESSION_SEG"
+  [ -n "$FIVE_SEG" ]  && printf '%s\n' "$FIVE_SEG"
+  [ -n "$SEVEN_SEG" ] && printf '%s\n' "$SEVEN_SEG"
+fi
 
 # Force exit 0 — in a fresh session without rate_limits, the last `[ -n ... ] &&`
 # short-circuits and makes the whole script exit 1, which makes Claude Code

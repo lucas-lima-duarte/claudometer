@@ -9,7 +9,7 @@ Most usage statuslines show you a number: "5-hour limit, 38%." claudometer shows
 <!-- TODO: add docs/screenshot.png (real terminal capture, with color) before release -->
 
 ```text
-claudometer  Opus 4.8  high effort
+claudometer  Opus 4.8  high effort   ● ● ●  boost it
 Session  ━━━━━━━━━━────────────  42%
 5-hour   ━━━━▪━━──▪────▪────▪──  38%  14:30
 Weekly   ━━━▪━━━▪────▪────▪──    61%  Sat 11 Jul
@@ -37,9 +37,24 @@ usage against how much of the window has already elapsed:
 So a bar that's 60% full isn't automatically "bad": if you're 4 days into the weekly window, 60%
 is *ahead of pace* and shows green. The same 60% one hour into the 5-hour window shows red.
 
+## The copilot pedal
+
+Every other statusline just *shows* you a number. claudometer also tells you **what to do about
+it**. The `● ● ●` on line 1 is a three-position pedal — the lit dot is where you are:
+
+| Pedal | Meaning | Suggests |
+| :---- | :------ | :------- |
+| **boost it** (dot 1, green) | ahead of pace — quota to spare | push harder |
+| **hold it** (dot 2, orange) | on pace | keep going |
+| **save it** (dot 3, salmon) | burning too fast — you may hit the wall | ease off → a cheaper model |
+
+It synthesizes **both** windows into one recommendation: the more-severe window wins, and a dim tag
+(` · 5h` / ` · week`) names which one pulled the pedal when they disagree. On `save it` the arrow
+suggests the biggest quota saving for your current model (`→ Sonnet`, `→ Haiku`, or `→ /compact`).
+
 ## What each line shows
 
-- **Line 1** — current folder, model, and reasoning effort.
+- **Line 1** — current folder, model, reasoning effort, and the copilot pedal.
 - **Session** — context-window usage for the current session.
 - **5-hour** — your rolling 5-hour rate-limit usage, segmented by hour, with the reset time.
 - **Weekly** — your rolling 7-day rate-limit usage, segmented by day, with the reset date.
@@ -84,6 +99,35 @@ claude --plugin-dir /path/to/claudometer
 Then run `/claudometer:setup` and Claude will detect the script path and write the `statusLine`
 block into your `settings.json` for you.
 
+## Configuration
+
+All optional, via environment variables. With none set you get `fuel` + `segmented` + `en` — the
+output shown at the top. Set them inline in your `statusLine` command (or export them in your shell).
+
+| Variable | Values | Default | What it does |
+| :------- | :----- | :------ | :----------- |
+| `CLAUDOMETER_THEME` | `fuel` · `mono` · `neon` | `fuel` | color palette |
+| `CLAUDOMETER_STYLE` | `segmented` · `blocks` · `compact` | `segmented` | bar layout |
+| `CLAUDOMETER_LANG`  | `en` · `pt` | `$LANG` prefix, else `en` | language |
+
+Example — neon palette, compact layout, in Portuguese:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "CLAUDOMETER_THEME=neon CLAUDOMETER_STYLE=compact CLAUDOMETER_LANG=pt /path/to/claudometer/scripts/statusline.sh"
+  }
+}
+```
+
+- **`mono`** stays grayscale and only colors the `save it` alert — for sober terminals.
+- **`blocks`** uses solid `█░` bars (keeps the active-segment highlight, drops the dividers).
+- **`compact`** collapses everything onto one line and omits the Session bar.
+- Run `scripts/demo.sh` to preview every state, theme, style and language at once.
+- Portuguese accented labels (e.g. `Sessão`) can sit one column off in `segmented` — cosmetic, and
+  depends on your terminal's locale.
+
 ## Privacy
 
 claudometer is just a local shell script. It makes **zero network/API calls** and uses **zero
@@ -91,13 +135,9 @@ tokens** — Claude Code pipes the session JSON to it on stdin and renders whate
 
 ## Roadmap
 
-- **Copilot pedal** — an at-a-glance recommendation that reads your pacing and tells you when to
-  *push* or *ease off* (e.g. drop to a cheaper model when you're burning too fast). No other
-  statusline recommends an action — this is the headline feature coming next.
-- **Themes** — color palettes (`fuel` / `mono` / `neon`) × layouts (`segmented` / `compact` /
-  `blocks`).
-- **i18n** — English and Portuguese (pt-br) strings.
+- **More palettes** — Nord / Dracula / Gruvbox.
 - **Multi-profile indicator** — show which `CLAUDE_CONFIG_DIR` profile is active, generically.
+- **Perfect multibyte alignment** — column-count padding so accented labels align in every locale.
 
 ## Contributing
 

@@ -18,16 +18,26 @@ lands through a reviewed PR.
 
 ## Testing your change
 
-The script reads Claude Code's status JSON on stdin. Test with a mock payload:
+The fastest check is the demo harness — it renders every pace state, theme, style and language
+with live reset times:
 
 ```bash
-bash scripts/statusline.sh <<< '{"model":{"display_name":"Opus 4.8"},"effort":{"level":"high"},"context_window":{"used_percentage":42},"rate_limits":{"five_hour":{"used_percentage":38,"resets_at":9999999999},"seven_day":{"used_percentage":61,"resets_at":9999999999}}}'
+bash scripts/demo.sh
 ```
 
-Or load it live in a throwaway session:
+To test a single case, pipe a mock on stdin. `resets_at` must be **relative to now** — a fixed
+far-future value always lands at the start of the window, so the pedal never reaches `save it`:
+
+```bash
+FIVE=$(( $(date +%s) + 9000 )); SEVEN=$(( $(date +%s) + 302400 ))
+bash scripts/statusline.sh <<< '{"model":{"display_name":"Opus 4.8"},"effort":{"level":"high"},"context_window":{"used_percentage":42},"rate_limits":{"five_hour":{"used_percentage":80,"resets_at":'"$FIVE"'},"seven_day":{"used_percentage":85,"resets_at":'"$SEVEN"'}}}'
+```
+
+Or load it live in a throwaway session (try the themes/styles too):
 
 ```bash
 claude --plugin-dir .
+CLAUDOMETER_THEME=neon CLAUDOMETER_STYLE=compact claude --plugin-dir .
 ```
 
 ## Style & scope

@@ -22,18 +22,25 @@ do not clobber unrelated settings.
 
 3. **Read** `~/.claude/settings.json`. If it doesn't exist, treat it as `{}`.
 
-4. **Merge** this block, preserving every other key already in the file:
+4. **Offer configuration (all optional).** Ask the user, or accept the defaults, for:
+   - **theme** — `fuel` (default) · `mono` · `neon`
+   - **style** — `segmented` (default) · `blocks` · `compact`
+   - **language** — `en` (default) · `pt`
+   Build an env-var prefix from **only the non-default** choices (defaults keep the command clean),
+   e.g. `CLAUDOMETER_THEME=neon CLAUDOMETER_LANG=pt `. If everything is default, use no prefix.
+
+5. **Merge** this block, preserving every other key already in the file:
    ```json
    {
      "statusLine": {
        "type": "command",
-       "command": "<ABSOLUTE_PATH>/scripts/statusline.sh"
+       "command": "<ENV_PREFIX><ABSOLUTE_PATH>/scripts/statusline.sh"
      }
    }
    ```
    If a `statusLine` block already exists, show the user the current value and ask for confirmation
    before overwriting it.
 
-5. **Confirm** to the user that claudometer is configured and will appear on the next status
+6. **Confirm** to the user that claudometer is configured and will appear on the next status
    refresh (a new prompt, or restarting Claude Code). Note it renders only for Pro/Max accounts
    (the 5-hour / 7-day bars need the `rate_limits` payload) and after the first message of a session.
