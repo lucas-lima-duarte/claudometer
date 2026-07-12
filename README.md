@@ -88,11 +88,15 @@ Add this to your `~/.claude/settings.json` (merge with whatever is already there
 
 ### Option 2 — As a plugin
 
-```bash
-claude --plugin-dir /path/to/claudometer
+```
+/plugin marketplace add lucas-lima-duarte/claudometer
+/plugin install claudometer@claudometer
+/claudometer:setup
 ```
 
-Then run `/claudometer:setup` and Claude writes the `statusLine` block for you.
+`/claudometer:setup` writes the `statusLine` block for you, and `/claudometer:theme <theme> [style]
+[lang]` switches everything afterwards — no editing `settings.json` by hand. (To try it without
+installing: `claude --plugin-dir /path/to/claudometer`.)
 
 ## Configuration
 

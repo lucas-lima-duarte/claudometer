@@ -1,0 +1,13 @@
+{
+  "name": "claudometer",
+  "owner": {
+    "name": "Lucas Duarte"
+  },
+  "plugins": [
+    {
+      "name": "claudometer",
+      "source": ".",
+      "description": "A time-paced rate-limit statusline for Claude Code: segmented 5h/7d bars plus a copilot pedal that recommends when to push or ease off. Themes, styles and English/Portuguese."
+    }
+  ]
+}
