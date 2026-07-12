@@ -63,8 +63,8 @@ esac
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Layer C — i18n. bash 3.2 has no associative arrays → case only.
-# Model names (Sonnet/Haiku) are never translated. Labels must fit 7 columns
-# to keep the %-7s alignment (see UTF-8 note in README).
+# Model names (Sonnet/Haiku) are never translated. Labels should fit 7 display
+# columns; pad_label (below) keeps them aligned even with accents.
 # ─────────────────────────────────────────────────────────────────────────────
 t() {
   case "$LANG_SEL" in
@@ -83,6 +83,17 @@ t() {
         effort) echo "effort" ;;
       esac ;;
   esac
+}
+
+# pad_label <str> <width> — left-justify to <width> DISPLAY columns. Unlike printf %-Ns
+# (which counts bytes), this counts characters, so accented pt labels like "Sessão"
+# stay aligned. ${#s} is character-aware under a UTF-8 locale; under C/byte locales it
+# degrades to the old (byte-based) behavior — never worse.
+pad_label() {
+  local s=$1 w=$2
+  local i=${#s}   # separate line: ${#s} must see s already assigned (bash `local` gotcha)
+  printf '%s' "$s"
+  while [ "$i" -lt "$w" ]; do printf ' '; i=$(( i + 1 )); done
 }
 
 # Current dir — basename only, like robbyrussell theme
@@ -367,8 +378,8 @@ fi
 # Build segment: Session — 1 segment, 28 columns
 CTX_COLOR=$(pct_color "$CTX_PCT")
 CTX_BAR=$(build_bar_segs "$CTX_PCT" 1 28 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM")
-SESSION_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m" \
-  "$(t lbl_session)" "$CTX_BAR" "$CTX_COLOR" "$CTX_PCT")
+SESSION_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m" \
+  "$(pad_label "$(t lbl_session)" 7)" "$CTX_BAR" "$CTX_COLOR" "$CTX_PCT")
 
 # Build segment: 5-hour — 5 segments (one per hour), 28 columns
 FIVE_SEG=""
@@ -382,8 +393,8 @@ if [ -n "$FIVE_HOUR_PCT" ]; then
   FIVE_COLOR=$(pct_color_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
   FIVE_COLOR_BRIGHT=$(pct_color_bright_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
   FIVE_BAR=$(build_bar_segs "$FIVE_H" 5 28 "$FIVE_ACTIVE_SEG" "$FIVE_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR" "$BAR_DIV")
-  FIVE_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m%s" \
-    "$(t lbl_5h)" "$FIVE_BAR" "$FIVE_COLOR" "$FIVE_H" "$FIVE_RESET_STR")
+  FIVE_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m%s" \
+    "$(pad_label "$(t lbl_5h)" 7)" "$FIVE_BAR" "$FIVE_COLOR" "$FIVE_H" "$FIVE_RESET_STR")
 fi
 
 # Build segment: Weekly — 7 segments (one per day), 28 columns
@@ -398,8 +409,8 @@ if [ -n "$SEVEN_DAY_PCT" ]; then
   SEVEN_COLOR=$(pct_color_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
   SEVEN_COLOR_BRIGHT=$(pct_color_bright_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
   SEVEN_BAR=$(build_bar_segs "$SEVEN_D" 7 28 "$SEVEN_ACTIVE_SEG" "$SEVEN_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$SEVEN_COLOR" "$BAR_DIV")
-  SEVEN_SEG=$(printf "${ORANGE}%-7s\033[0m %b %b%3s%%\033[0m%s" \
-    "$(t lbl_weekly)" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
+  SEVEN_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m%s" \
+    "$(pad_label "$(t lbl_weekly)" 7)" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
 fi
 
 # Layer F — output per style. segmented/blocks share the stacked layout (bar glyphs

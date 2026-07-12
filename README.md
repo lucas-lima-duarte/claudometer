@@ -130,10 +130,8 @@ Example — Dracula palette, compact layout, in Portuguese:
 - **`fuel`** is 256-color and works everywhere; **`nord`** and **`dracula`** are the official
   palettes in truecolor (need a truecolor terminal — most modern ones qualify).
 - **`blocks`** uses solid `█░` bars (keeps the active-segment highlight, drops the dividers).
-- **`compact`** collapses everything onto one line and omits the Session bar.
+- **`compact`** collapses everything onto one line, keeping a mini paced bar for 5h/7d.
 - Run `scripts/demo.sh` to preview every state, theme, style and language at once.
-- Portuguese accented labels (e.g. `Sessão`) can sit one column off in `segmented` — cosmetic, and
-  depends on your terminal's locale.
 
 ## Privacy
 
@@ -144,7 +142,7 @@ tokens** — Claude Code pipes the session JSON to it on stdin and renders whate
 
 - **More palettes** — Gruvbox / Solarized / Tokyo Night / Catppuccin.
 - **Multi-profile indicator** — show which `CLAUDE_CONFIG_DIR` profile is active, generically.
-- **Perfect multibyte alignment** — column-count padding so accented labels align in every locale.
+- **Punchier copy** — more characterful wording for the pedal and labels.
 
 ## Contributing
 
