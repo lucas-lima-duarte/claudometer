@@ -292,14 +292,22 @@ pedal_render() {
   printf '%b' "$out"
 }
 
-# render_compact — one-line layout (STYLE=compact). Omits the Session bar for a
-# minimal footprint; shows folder, model, the pedal, and 5h/7d percentages.
+# render_compact — one-line layout (STYLE=compact). Keeps claudometer's core idea —
+# a paced bar — in miniature: folder, model, the pedal, then a short 10-column gauge
+# (paced color) + % for 5h and 7d. Omits the Session bar for a minimal footprint.
 render_compact() {
+  local mb
   printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
   [ -n "$MODEL" ]     && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
   [ -n "$PEDAL_STR" ] && printf "  %b" "$PEDAL_STR"
-  [ -n "$FIVE_H" ]    && printf "   ${DIM}5h${RESET} %b%s%%${RESET}" "$FIVE_COLOR" "$FIVE_H"
-  [ -n "$SEVEN_D" ]   && printf "  ${DIM}7d${RESET} %b%s%%${RESET}" "$SEVEN_COLOR" "$SEVEN_D"
+  if [ -n "$FIVE_H" ]; then
+    mb=$(build_bar_segs "$FIVE_H" 1 10 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR")
+    printf "   ${DIM}5h${RESET} %b %b%s%%${RESET}" "$mb" "$FIVE_COLOR" "$FIVE_H"
+  fi
+  if [ -n "$SEVEN_D" ]; then
+    mb=$(build_bar_segs "$SEVEN_D" 1 10 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM" "$SEVEN_COLOR")
+    printf "  ${DIM}7d${RESET} %b %b%s%%${RESET}" "$mb" "$SEVEN_COLOR" "$SEVEN_D"
+  fi
   printf "\n"
 }
 
