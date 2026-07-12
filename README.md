@@ -1,72 +1,72 @@
 # claudometer
 
-**A time-paced rate-limit statusline for Claude Code.**
+**A time-paced rate-limit statusline for Claude Code** — bars that double as a clock, plus a
+copilot pedal that tells you when to push or ease off.
 
-Most usage statuslines show you a number: "5-hour limit, 38%." claudometer shows you that number
-**against the clock** — the bars are segmented by time, so you can see at a glance whether you're
-*ahead of pace*, *on pace*, or *burning your quota too fast* for how far you are into the window.
+![claudometer](docs/hero.svg)
 
-<!-- TODO: add docs/screenshot.png (real terminal capture, with color) before release -->
+Most usage statuslines show you a number. claudometer shows it **against the clock**: the 5-hour
+and 7-day bars are split into time segments, so you can see at a glance whether you're *ahead of
+pace*, *on pace*, or *burning too fast* — and the pedal (`● ● ●`) recommends what to do about it.
 
-```text
-claudometer  Opus 4.8  high effort   ● ● ●  boost it
-Session  ━━━━━━━━━━────────────  42%
-5-hour   ━━━━▪━━──▪────▪────▪──  38%  14:30
-Weekly   ━━━▪━━━▪────▪────▪──    61%  Sat 11 Jul
-```
+## Bars that are also a clock
 
-## The idea: bars that are also a clock
-
-Claude Code's rate limits roll over on fixed windows — every **5 hours** and every **7 days**.
-claudometer splits each bar into segments that map 1:1 onto that window:
-
-- **5-hour** bar → **5 segments**, one per hour (the `▪` marks divide them).
-- **Weekly** bar → **7 segments**, one per day.
-
-The segment for **right now** is highlighted, and the fill color is **paced** — it compares your
-usage against how much of the window has already elapsed:
+Claude Code's rate limits roll over every **5 hours** and every **7 days**. claudometer splits each
+bar into segments that map onto that window — 5 segments (one per hour), 7 segments (one per day) —
+highlights the segment for *right now*, and colors the fill by **pace**:
 
 | Color | Meaning |
 | :---- | :------ |
-| 🟢 green | **Ahead** — you're using less than your time-share of the window. Room to spare. |
-| 🟠 orange | **On pace** — you're spending roughly the quota budgeted for where you are. |
-| 🔴 red/salmon | **Behind** — you've burned past your time-share. You may hit the wall before it resets. |
+| 🟢 green | **ahead** — using less than your time-share of the window. Room to spare. |
+| 🟠 orange | **on pace** — spending about the quota budgeted for where you are. |
+| 🔴 red | **behind** — burned past your time-share; you may hit the wall before it resets. |
 
-(In the terminal these are real ANSI colors, not emoji — the table just labels them here.)
-
-So a bar that's 60% full isn't automatically "bad": if you're 4 days into the weekly window, 60%
-is *ahead of pace* and shows green. The same 60% one hour into the 5-hour window shows red.
+So a bar that's 60% full isn't automatically bad: 4 days into the weekly window, 60% is *ahead*
+(green); one hour into the 5-hour window, the same 60% is *behind* (red).
 
 ## The copilot pedal
 
-Every other statusline just *shows* you a number. claudometer also tells you **what to do about
-it**. The `● ● ●` on line 1 is a three-position pedal — the lit dot is where you are:
+Every other statusline just *shows* the number. claudometer also tells you **what to do**. The
+`● ● ●` on line 1 is a three-position pedal — the lit dot is where you are:
 
 | Pedal | Meaning | Suggests |
 | :---- | :------ | :------- |
-| **boost it** (dot 1, green) | ahead of pace — quota to spare | push harder |
-| **hold it** (dot 2, orange) | on pace | keep going |
-| **save it** (dot 3, salmon) | burning too fast — you may hit the wall | ease off → a cheaper model |
+| **boost it** (green) | ahead of pace — quota to spare | push harder |
+| **hold it** (orange) | on pace | keep going |
+| **save it** (red) | burning too fast | ease off → a cheaper model |
 
-It synthesizes **both** windows into one recommendation: the more-severe window wins, and a dim tag
-(` · 5h` / ` · week`) names which one pulled the pedal when they disagree. On `save it` the arrow
-suggests the biggest quota saving for your current model (`→ Sonnet`, `→ Haiku`, or `→ /compact`).
+It synthesizes **both** windows into one recommendation: the more-severe window wins, with a dim
+tag (` · 5h` / ` · week`) when they disagree. On `save it`, the arrow suggests the biggest quota
+saving for your current model (`→ Sonnet` / `→ Haiku` / `→ /compact`).
 
-## What each line shows
+## Themes
 
-- **Line 1** — current folder, model, reasoning effort, and the copilot pedal.
-- **Session** — context-window usage for the current session.
-- **5-hour** — your rolling 5-hour rate-limit usage, segmented by hour, with the reset time.
-- **Weekly** — your rolling 7-day rate-limit usage, segmented by day, with the reset date.
+Three palettes — `fuel` (default; 256-color, works everywhere), plus the official **Nord** and
+**Dracula** in truecolor. Switch anytime with `/claudometer:theme` or an env var.
+
+![fuel](docs/theme-fuel.svg)
+![nord](docs/theme-nord.svg)
+![dracula](docs/theme-dracula.svg)
+
+## Styles
+
+`segmented` (default), `blocks` (a solid gauge — same clock, no dividers), and `compact` (one line,
+keeping a mini paced bar):
+
+![blocks](docs/style-blocks.svg)
+![compact](docs/style-compact.svg)
+
+## Languages
+
+English and Portuguese:
+
+![português](docs/lang-pt.svg)
 
 ## Install
 
-### Requirements
-
-- [`jq`](https://jqlang.github.io/jq/) (`brew install jq` / `apt install jq`)
-- Claude Code **2.1+**
-- A **Pro or Max** plan — the 5-hour / 7-day bars need the `rate_limits` data Claude Code sends for
-  subscribers. (The context bar works on any plan.)
+**Requirements:** [`jq`](https://jqlang.github.io/jq/), Claude Code **2.1+**, and a **Pro or Max**
+plan (the 5h/7d bars need the `rate_limits` data Claude Code sends to subscribers; the context bar
+works on any plan). Truecolor themes need a truecolor terminal.
 
 ### Option 1 — Manual (recommended)
 
@@ -75,7 +75,7 @@ git clone https://github.com/lucas-lima-duarte/claudometer.git
 chmod +x claudometer/scripts/statusline.sh
 ```
 
-Then add this to your `~/.claude/settings.json` (merge it with whatever is already there):
+Add this to your `~/.claude/settings.json` (merge with whatever is already there):
 
 ```json
 {
@@ -86,29 +86,23 @@ Then add this to your `~/.claude/settings.json` (merge it with whatever is alrea
 }
 ```
 
-The statusline appears on your next prompt.
-
 ### Option 2 — As a plugin
-
-Load it directly for a session:
 
 ```bash
 claude --plugin-dir /path/to/claudometer
 ```
 
-Then run `/claudometer:setup` and Claude will detect the script path and write the `statusLine`
-block into your `settings.json` for you.
+Then run `/claudometer:setup` and Claude writes the `statusLine` block for you.
 
 ## Configuration
 
 Two ways — pick either:
 
 - **Easiest — the plugin command:** `/claudometer:theme <theme> [style] [lang]`, e.g.
-  `/claudometer:theme dracula compact`. It rewrites your `statusLine` for you. Run it with no
-  arguments to see the options.
+  `/claudometer:theme dracula compact`. Run it with no arguments to see the options.
 - **By hand:** set env vars inline in your `statusLine` command (or export them in your shell).
 
-All settings are optional; with none you get `fuel` + `segmented` + `en` (the output at the top).
+All optional; with none you get `fuel` + `segmented` + `en`.
 
 | Variable | Values | Default | What it does |
 | :------- | :----- | :------ | :----------- |
@@ -127,11 +121,7 @@ Example — Dracula palette, compact layout, in Portuguese:
 }
 ```
 
-- **`fuel`** is 256-color and works everywhere; **`nord`** and **`dracula`** are the official
-  palettes in truecolor (need a truecolor terminal — most modern ones qualify).
-- **`blocks`** uses solid `█░` bars (keeps the active-segment highlight, drops the dividers).
-- **`compact`** collapses everything onto one line, keeping a mini paced bar for 5h/7d.
-- Run `scripts/demo.sh` to preview every state, theme, style and language at once.
+Run `scripts/demo.sh` to preview every state, theme, style and language at once.
 
 ## Privacy
 
@@ -147,7 +137,8 @@ tokens** — Claude Code pipes the session JSON to it on stdin and renders whate
 ## Contributing
 
 `main` is protected — all changes go through pull requests, including the maintainer's. See
-[CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow.
+[CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow. The README images are generated from the
+statusline itself via `scripts/gen-readme-images.sh`.
 
 ## License
 
