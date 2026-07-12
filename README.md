@@ -101,27 +101,34 @@ block into your `settings.json` for you.
 
 ## Configuration
 
-All optional, via environment variables. With none set you get `fuel` + `segmented` + `en` — the
-output shown at the top. Set them inline in your `statusLine` command (or export them in your shell).
+Two ways — pick either:
+
+- **Easiest — the plugin command:** `/claudometer:theme <theme> [style] [lang]`, e.g.
+  `/claudometer:theme dracula compact`. It rewrites your `statusLine` for you. Run it with no
+  arguments to see the options.
+- **By hand:** set env vars inline in your `statusLine` command (or export them in your shell).
+
+All settings are optional; with none you get `fuel` + `segmented` + `en` (the output at the top).
 
 | Variable | Values | Default | What it does |
 | :------- | :----- | :------ | :----------- |
-| `CLAUDOMETER_THEME` | `fuel` · `mono` · `neon` | `fuel` | color palette |
+| `CLAUDOMETER_THEME` | `fuel` · `nord` · `dracula` | `fuel` | color palette |
 | `CLAUDOMETER_STYLE` | `segmented` · `blocks` · `compact` | `segmented` | bar layout |
 | `CLAUDOMETER_LANG`  | `en` · `pt` | `$LANG` prefix, else `en` | language |
 
-Example — neon palette, compact layout, in Portuguese:
+Example — Dracula palette, compact layout, in Portuguese:
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "CLAUDOMETER_THEME=neon CLAUDOMETER_STYLE=compact CLAUDOMETER_LANG=pt /path/to/claudometer/scripts/statusline.sh"
+    "command": "CLAUDOMETER_THEME=dracula CLAUDOMETER_STYLE=compact CLAUDOMETER_LANG=pt /path/to/claudometer/scripts/statusline.sh"
   }
 }
 ```
 
-- **`mono`** stays grayscale and only colors the `save it` alert — for sober terminals.
+- **`fuel`** is 256-color and works everywhere; **`nord`** and **`dracula`** are the official
+  palettes in truecolor (need a truecolor terminal — most modern ones qualify).
 - **`blocks`** uses solid `█░` bars (keeps the active-segment highlight, drops the dividers).
 - **`compact`** collapses everything onto one line and omits the Session bar.
 - Run `scripts/demo.sh` to preview every state, theme, style and language at once.
@@ -135,7 +142,7 @@ tokens** — Claude Code pipes the session JSON to it on stdin and renders whate
 
 ## Roadmap
 
-- **More palettes** — Nord / Dracula / Gruvbox.
+- **More palettes** — Gruvbox / Solarized / Tokyo Night / Catppuccin.
 - **Multi-profile indicator** — show which `CLAUDE_CONFIG_DIR` profile is active, generically.
 - **Perfect multibyte alignment** — column-count padding so accented labels align in every locale.
 

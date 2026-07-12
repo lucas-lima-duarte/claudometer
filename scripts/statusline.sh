@@ -13,7 +13,7 @@ if [ -z "$_lang_raw" ]; then
   case "$LANG" in pt*|PT*) _lang_raw=pt ;; *) _lang_raw=en ;; esac
 fi
 case "$_lang_raw" in pt) LANG_SEL=pt ;; *) LANG_SEL=en ;; esac
-case "${CLAUDOMETER_THEME:-fuel}"      in mono) THEME=mono ;; neon) THEME=neon ;; *) THEME=fuel ;; esac
+case "${CLAUDOMETER_THEME:-fuel}"      in nord) THEME=nord ;; dracula) THEME=dracula ;; *) THEME=fuel ;; esac
 case "${CLAUDOMETER_STYLE:-segmented}" in blocks) STYLE=blocks ;; compact) STYLE=compact ;; *) STYLE=segmented ;; esac
 # Bar glyphs per style (segmented default == MVP). blocks = solid gauge, no dividers.
 case "$STYLE" in
@@ -41,17 +41,17 @@ BOLD='\033[1m'
 RESET='\033[0m'
 ACTIVE_DIM_GRAY='\033[2;37m'
 case "$THEME" in
-  neon)
-    GREEN='\033[38;5;51m';   GREEN_BRIGHT='\033[38;5;87m'         # ahead  (cyan)
-    MODEL_COLOR='\033[38;5;201m'; ORANGE_BRIGHT='\033[38;5;207m'  # on-pace (magenta)
-    RED='\033[38;5;198m';    SALMON='\033[38;5;211m'             # behind (hot pink)
-    ORANGE='\033[38;5;201m'                                       # bar labels
+  nord)                                   # nordtheme.com — official palette (truecolor)
+    GREEN='\033[38;2;163;190;140m';       GREEN_BRIGHT='\033[38;2;192;214;168m'   # aurora green (ahead)
+    MODEL_COLOR='\033[38;2;235;203;139m'; ORANGE_BRIGHT='\033[38;2;245;223;176m'  # aurora yellow (on-pace)
+    RED='\033[38;2;191;97;106m';          SALMON='\033[38;2;208;135;112m'         # aurora red / orange (behind)
+    ORANGE='\033[38;2;129;161;193m'                                               # frost blue (labels)
     ;;
-  mono)
-    GREEN='\033[38;5;250m';  GREEN_BRIGHT='\033[38;5;255m'        # ahead  (light gray)
-    MODEL_COLOR='\033[38;5;245m'; ORANGE_BRIGHT='\033[38;5;250m'  # on-pace (mid gray)
-    RED='\033[38;5;214m';    SALMON='\033[38;5;215m'             # behind (amber — only live hue)
-    ORANGE='\033[38;5;245m'                                       # bar labels
+  dracula)                                # draculatheme.com — official palette (truecolor)
+    GREEN='\033[38;2;80;250;123m';        GREEN_BRIGHT='\033[38;2;125;251;155m'   # green (ahead)
+    MODEL_COLOR='\033[38;2;255;184;108m'; ORANGE_BRIGHT='\033[38;2;255;203;143m'  # orange (on-pace)
+    RED='\033[38;2;255;85;85m';           SALMON='\033[38;2;255;121;198m'         # red / pink (behind)
+    ORANGE='\033[38;2;189;147;249m'                                               # purple (labels)
     ;;
   *)  # fuel (default) — MUST equal the MVP literals (G0 non-regression)
     GREEN='\033[32m';        GREEN_BRIGHT='\033[38;5;120m'

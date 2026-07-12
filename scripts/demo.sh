@@ -28,8 +28,8 @@ run "$CONFLICT"
 hdr "Language — pt-br"
 run "$SAVE" CLAUDOMETER_LANG=pt
 hdr "Themes — save state"
-run "$SAVE" CLAUDOMETER_THEME=mono
-run "$SAVE" CLAUDOMETER_THEME=neon
+run "$SAVE" CLAUDOMETER_THEME=nord
+run "$SAVE" CLAUDOMETER_THEME=dracula
 hdr "Styles"
 run "$SAVE" CLAUDOMETER_STYLE=blocks
 run "$SAVE" CLAUDOMETER_STYLE=compact

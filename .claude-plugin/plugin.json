@@ -1,6 +1,6 @@
 {
   "name": "claudometer",
-  "description": "A time-paced rate-limit statusline for Claude Code: segmented 5h/7d usage bars plus a copilot pedal that reads your pacing and recommends when to push or ease off. Themes (fuel/mono/neon), styles (segmented/blocks/compact), and English/Portuguese.",
+  "description": "A time-paced rate-limit statusline for Claude Code: segmented 5h/7d usage bars plus a copilot pedal that reads your pacing and recommends when to push or ease off. Themes (fuel/nord/dracula), styles (segmented/blocks/compact), and English/Portuguese.",
   "version": "0.2.0",
   "author": {
     "name": "Lucas Duarte"
