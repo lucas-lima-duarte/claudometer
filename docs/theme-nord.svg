@@ -38,9 +38,9 @@
 <tspan x="194.0" fill="#ebcb8b">━</tspan>
 <tspan x="203.0" fill="#ebcb8b">━</tspan>
 <tspan x="212.0" fill="#ebcb8b">━</tspan>
-<tspan x="221.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
-<tspan x="230.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
-<tspan x="239.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="221.0" fill="#ebcb8b">━</tspan>
+<tspan x="230.0" fill="#ebcb8b">━</tspan>
+<tspan x="239.0" fill="#ebcb8b">━</tspan>
 <tspan x="248.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
 <tspan x="257.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
 <tspan x="266.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
@@ -51,8 +51,14 @@
 <tspan x="311.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
 <tspan x="320.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
 <tspan x="329.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
-<tspan x="338.0" fill="#c9d1d9"> </tspan>
-<tspan x="347.0" fill="#ebcb8b"> 55%</tspan>
+<tspan x="338.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="347.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="356.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="365.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="374.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="383.0" fill="#ebcb8b" fill-opacity="0.55">─</tspan>
+<tspan x="392.0" fill="#c9d1d9"> </tspan>
+<tspan x="401.0" fill="#ebcb8b"> 55%</tspan>
 </text>
 <text y="95" xml:space="preserve">
 <tspan x="14.0" fill="#81a1c1">5-hour </tspan>
@@ -69,26 +75,32 @@
 <tspan x="167.0" fill="#bf616a">━</tspan>
 <tspan x="176.0" fill="#bf616a">━</tspan>
 <tspan x="185.0" fill="#bf616a">━</tspan>
-<tspan x="194.0" fill="#6e7681">▪</tspan>
-<tspan x="203.0" fill="#d08770">━</tspan>
+<tspan x="194.0" fill="#bf616a">━</tspan>
+<tspan x="203.0" fill="#6e7681">▪</tspan>
 <tspan x="212.0" fill="#d08770">━</tspan>
 <tspan x="221.0" fill="#d08770">━</tspan>
 <tspan x="230.0" fill="#d08770">━</tspan>
-<tspan x="239.0" fill="#6e7681">▪</tspan>
-<tspan x="248.0" fill="#bf616a">━</tspan>
-<tspan x="257.0" fill="#bf616a">━</tspan>
-<tspan x="266.0" fill="#bf616a">━</tspan>
+<tspan x="239.0" fill="#d08770">━</tspan>
+<tspan x="248.0" fill="#d08770">━</tspan>
+<tspan x="257.0" fill="#d08770">━</tspan>
+<tspan x="266.0" fill="#6e7681">▪</tspan>
 <tspan x="275.0" fill="#bf616a">━</tspan>
-<tspan x="284.0" fill="#bf616a" fill-opacity="0.55">─</tspan>
-<tspan x="293.0" fill="#6e7681" fill-opacity="0.55">▪</tspan>
-<tspan x="302.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="311.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="320.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="329.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="338.0" fill="#c9d1d9"> </tspan>
-<tspan x="347.0" fill="#bf616a"> 80%</tspan>
-<tspan x="383.0" fill="#c9d1d9"> </tspan>
-<tspan x="392.0" fill="#c9d1d9" fill-opacity="0.55">14:56</tspan>
+<tspan x="284.0" fill="#bf616a">━</tspan>
+<tspan x="293.0" fill="#bf616a">━</tspan>
+<tspan x="302.0" fill="#bf616a">━</tspan>
+<tspan x="311.0" fill="#bf616a">━</tspan>
+<tspan x="320.0" fill="#bf616a">━</tspan>
+<tspan x="329.0" fill="#6e7681">▪</tspan>
+<tspan x="338.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="347.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="356.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="365.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="374.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="383.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="392.0" fill="#c9d1d9"> </tspan>
+<tspan x="401.0" fill="#bf616a"> 80%</tspan>
+<tspan x="437.0" fill="#c9d1d9"> </tspan>
+<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">20:05</tspan>
 </text>
 <text y="117" xml:space="preserve">
 <tspan x="14.0" fill="#81a1c1">Weekly </tspan>
@@ -101,19 +113,19 @@
 <tspan x="131.0" fill="#ebcb8b">━</tspan>
 <tspan x="140.0" fill="#ebcb8b">━</tspan>
 <tspan x="149.0" fill="#ebcb8b">━</tspan>
-<tspan x="158.0" fill="#6e7681">▪</tspan>
-<tspan x="167.0" fill="#ebcb8b">━</tspan>
+<tspan x="158.0" fill="#ebcb8b">━</tspan>
+<tspan x="167.0" fill="#6e7681">▪</tspan>
 <tspan x="176.0" fill="#ebcb8b">━</tspan>
 <tspan x="185.0" fill="#ebcb8b">━</tspan>
-<tspan x="194.0" fill="#6e7681">▪</tspan>
-<tspan x="203.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
-<tspan x="212.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
+<tspan x="194.0" fill="#ebcb8b">━</tspan>
+<tspan x="203.0" fill="#ebcb8b">━</tspan>
+<tspan x="212.0" fill="#6e7681">▪</tspan>
 <tspan x="221.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
-<tspan x="230.0" fill="#6e7681" fill-opacity="0.55">▪</tspan>
-<tspan x="239.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="248.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="257.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="266.0" fill="#6e7681" fill-opacity="0.55">▪</tspan>
+<tspan x="230.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
+<tspan x="239.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
+<tspan x="248.0" fill="#d4d4d4" fill-opacity="0.55">─</tspan>
+<tspan x="257.0" fill="#6e7681" fill-opacity="0.55">▪</tspan>
+<tspan x="266.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
 <tspan x="275.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
 <tspan x="284.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
 <tspan x="293.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
@@ -121,9 +133,15 @@
 <tspan x="311.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
 <tspan x="320.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
 <tspan x="329.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
-<tspan x="338.0" fill="#c9d1d9"> </tspan>
-<tspan x="347.0" fill="#ebcb8b"> 44%</tspan>
-<tspan x="383.0" fill="#c9d1d9"> </tspan>
-<tspan x="392.0" fill="#c9d1d9" fill-opacity="0.55">Thu 16 Jul</tspan>
+<tspan x="338.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="347.0" fill="#6e7681" fill-opacity="0.55">▪</tspan>
+<tspan x="356.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="365.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="374.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="383.0" fill="#c9d1d9" fill-opacity="0.55">─</tspan>
+<tspan x="392.0" fill="#c9d1d9"> </tspan>
+<tspan x="401.0" fill="#ebcb8b"> 44%</tspan>
+<tspan x="437.0" fill="#c9d1d9"> </tspan>
+<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">Thu 16 Jul</tspan>
 </text>
 </svg>

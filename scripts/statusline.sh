@@ -179,27 +179,29 @@ pct_color_bright_paced() {
   fi
 }
 
-# Draw a FIXED-WIDTH bar of TOTAL_COLS columns, split into N_SEGS time segments so every
-# bar lines up regardless of how many segments it has. A segment boundary shows the divider
-# glyph in `segmented`; `blocks` passes divider='' so those columns render as normal cells —
-# either way the bar is exactly TOTAL_COLS columns wide.
+# Draw a bar of N_SEGS UNIFORM segments (SEG_W blocks each) with a 1-column divider slot
+# between them, so every segment is the same width AND every bar is the same total width:
+#   total = N_SEGS*SEG_W + (N_SEGS-1). With Session 1×34, 5-hour 5×6, Weekly 7×4 → all 34.
+# In `segmented` the slot shows the gray ▪; in `blocks` (divider='') it renders as a normal
+# bar cell, so the width is identical in both styles.
 #
-# Usage: build_bar_segs <pct> <n_segs> <total_cols> [active_seg] [bright] [filled] [dim] [color_override] [divider]
+# Usage: build_bar_segs <pct> <n_segs> <seg_w> [active_seg] [bright] [filled] [dim] [color_override] [divider]
 # active_seg:      0-based index of current segment to highlight (-1 = none)
 # bright:          bright/bold color used on the active filled cell
 # filled / dim:    glyphs for filled / empty cells (default ━ / ─)
 # color_override:  force the bar's base color (else derived from pct)
-# divider:         glyph at segment boundaries (default ▪; '' = none, for the blocks style)
+# divider:         glyph at segment boundaries (default ▪; '' = none → blocks fills the slot)
 build_bar_segs() {
   local pct=$1
   local n_segs=$2
-  local total=$3
+  local seg_w=$3
   local active_seg=${4:--1}
   local BAR_COLOR_BRIGHT=${5:-'\033[1;97m'}
   local filled_char=${6:-━}
   local dim_char=${7:-─}
   local BAR_COLOR_OVERRIDE=${8:-}
-  local divider_char=${9-▪}   # unset → default ▪; explicit '' (blocks) → no divider
+  local divider_char=${9-▪}   # unset → default ▪; explicit '' (blocks) → fill the slot
+  local total=$(( n_segs * seg_w + (n_segs - 1) ))
   local filled=$(( pct * total / 100 ))
   local BAR_COLOR
   if [ -n "$BAR_COLOR_OVERRIDE" ]; then
@@ -208,25 +210,36 @@ build_bar_segs() {
     BAR_COLOR=$(pct_color "$pct")
   fi
 
-  local bar="" c=0 prev_seg=0 seg
-  while [ $c -lt $total ]; do
-    seg=$(( c * n_segs / total ))
-    if [ $c -gt 0 ] && [ "$seg" != "$prev_seg" ] && [ -n "$divider_char" ]; then
-      # Segment boundary — divider glyph (gray, not part of the fill)
-      bar="${bar}\033[90m${divider_char}\033[0m"
-    elif [ "$seg" -eq "$active_seg" ]; then
-      if [ $c -lt $filled ]; then
-        bar="${bar}${BAR_COLOR_BRIGHT}${filled_char}"   # active + filled
+  local bar="" cells=0 seg=0 b
+  while [ $seg -lt $n_segs ]; do
+    if [ $seg -gt 0 ]; then
+      # Divider slot — always 1 column so both styles share the same width
+      if [ -n "$divider_char" ]; then
+        bar="${bar}\033[90m${divider_char}\033[0m"            # segmented: gray divider glyph
+      elif [ $cells -lt $filled ]; then
+        bar="${bar}${BAR_COLOR}${filled_char}"                 # blocks: slot filled
       else
-        bar="${bar}${ACTIVE_DIM_GRAY}${dim_char}"        # active + dim
+        bar="${bar}${DIM}${dim_char}"                          # blocks: slot empty
       fi
-    elif [ $c -lt $filled ]; then
-      bar="${bar}${BAR_COLOR}${filled_char}"
-    else
-      bar="${bar}${DIM}${dim_char}"
+      cells=$(( cells + 1 ))
     fi
-    prev_seg=$seg
-    c=$(( c + 1 ))
+    b=0
+    while [ $b -lt $seg_w ]; do
+      if [ "$seg" -eq "$active_seg" ]; then
+        if [ $cells -lt $filled ]; then
+          bar="${bar}${BAR_COLOR_BRIGHT}${filled_char}"        # active + filled
+        else
+          bar="${bar}${ACTIVE_DIM_GRAY}${dim_char}"            # active + dim
+        fi
+      elif [ $cells -lt $filled ]; then
+        bar="${bar}${BAR_COLOR}${filled_char}"
+      else
+        bar="${bar}${DIM}${dim_char}"
+      fi
+      cells=$(( cells + 1 ))
+      b=$(( b + 1 ))
+    done
+    seg=$(( seg + 1 ))
   done
   bar="${bar}${RESET}"
   printf '%b' "$bar"
@@ -375,13 +388,13 @@ if [ "$STYLE" != "compact" ]; then
   printf "\n"
 fi
 
-# Build segment: Session — 1 segment, 28 columns
+# Build segment: Session — 1 segment × 34 = 34 columns
 CTX_COLOR=$(pct_color "$CTX_PCT")
-CTX_BAR=$(build_bar_segs "$CTX_PCT" 1 28 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM")
+CTX_BAR=$(build_bar_segs "$CTX_PCT" 1 34 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM")
 SESSION_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m" \
   "$(pad_label "$(t lbl_session)" 7)" "$CTX_BAR" "$CTX_COLOR" "$CTX_PCT")
 
-# Build segment: 5-hour — 5 segments (one per hour), 28 columns
+# Build segment: 5-hour — 5 segments (one per hour) × 6 + 4 dividers = 34 columns
 FIVE_SEG=""
 if [ -n "$FIVE_HOUR_PCT" ]; then
   # FIVE_H / FIVE_ACTIVE_SEG already computed in Layer E.
@@ -392,12 +405,12 @@ if [ -n "$FIVE_HOUR_PCT" ]; then
   fi
   FIVE_COLOR=$(pct_color_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
   FIVE_COLOR_BRIGHT=$(pct_color_bright_paced "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
-  FIVE_BAR=$(build_bar_segs "$FIVE_H" 5 28 "$FIVE_ACTIVE_SEG" "$FIVE_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR" "$BAR_DIV")
+  FIVE_BAR=$(build_bar_segs "$FIVE_H" 5 6 "$FIVE_ACTIVE_SEG" "$FIVE_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR" "$BAR_DIV")
   FIVE_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m%s" \
     "$(pad_label "$(t lbl_5h)" 7)" "$FIVE_BAR" "$FIVE_COLOR" "$FIVE_H" "$FIVE_RESET_STR")
 fi
 
-# Build segment: Weekly — 7 segments (one per day), 28 columns
+# Build segment: Weekly — 7 segments (one per day) × 4 + 6 dividers = 34 columns
 SEVEN_SEG=""
 if [ -n "$SEVEN_DAY_PCT" ]; then
   # SEVEN_D / SEVEN_ACTIVE_SEG already computed in Layer E.
@@ -408,7 +421,7 @@ if [ -n "$SEVEN_DAY_PCT" ]; then
   fi
   SEVEN_COLOR=$(pct_color_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
   SEVEN_COLOR_BRIGHT=$(pct_color_bright_paced "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
-  SEVEN_BAR=$(build_bar_segs "$SEVEN_D" 7 28 "$SEVEN_ACTIVE_SEG" "$SEVEN_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$SEVEN_COLOR" "$BAR_DIV")
+  SEVEN_BAR=$(build_bar_segs "$SEVEN_D" 7 4 "$SEVEN_ACTIVE_SEG" "$SEVEN_COLOR_BRIGHT" "$BAR_FILL" "$BAR_DIM" "$SEVEN_COLOR" "$BAR_DIV")
   SEVEN_SEG=$(printf "${ORANGE}%s\033[0m %b %b%3s%%\033[0m%s" \
     "$(pad_label "$(t lbl_weekly)" 7)" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
 fi
