@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="649" height="138" viewBox="0 0 649 138" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15">
-<rect width="649" height="138" rx="8" fill="#0d1117"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="559" height="138" viewBox="0 0 559 138" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15">
+<rect width="559" height="138" rx="8" fill="#0d1117"/>
 <text x="14.0" y="25.0" font-size="12" fill="#6e7681">theme: fuel</text>
 <text y="51" xml:space="preserve">
 <tspan x="14.0" fill="#4ec9b0" font-weight="bold">claudometer</tspan>
@@ -7,18 +7,6 @@
 <tspan x="131.0" fill="#ff8700" font-weight="bold">Opus 4.8</tspan>
 <tspan x="203.0" fill="#c9d1d9">  </tspan>
 <tspan x="221.0" fill="#ff8700" font-weight="bold">high effort</tspan>
-<tspan x="320.0" fill="#c9d1d9">   </tspan>
-<tspan x="347.0" fill="#c9d1d9" fill-opacity="0.55">●</tspan>
-<tspan x="365.0" fill="#c9d1d9"> </tspan>
-<tspan x="374.0" fill="#c9d1d9" fill-opacity="0.55">●</tspan>
-<tspan x="392.0" fill="#c9d1d9"> </tspan>
-<tspan x="401.0" fill="#ff8787">●</tspan>
-<tspan x="419.0" fill="#c9d1d9">  </tspan>
-<tspan x="437.0" fill="#ff8787" font-weight="bold">save it</tspan>
-<tspan x="500.0" fill="#c9d1d9"> </tspan>
-<tspan x="509.0" fill="#c9d1d9" fill-opacity="0.55">· 5h</tspan>
-<tspan x="545.0" fill="#c9d1d9"> </tspan>
-<tspan x="554.0" fill="#c9d1d9" fill-opacity="0.55">→ Sonnet</tspan>
 </text>
 <text y="73" xml:space="preserve">
 <tspan x="14.0" fill="#ffaf00">Session</tspan>
@@ -100,7 +88,7 @@
 <tspan x="392.0" fill="#c9d1d9"> </tspan>
 <tspan x="401.0" fill="#f44747"> 80%</tspan>
 <tspan x="437.0" fill="#c9d1d9"> </tspan>
-<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">20:05</tspan>
+<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">15:57</tspan>
 </text>
 <text y="117" xml:space="preserve">
 <tspan x="14.0" fill="#ffaf00">Weekly </tspan>
@@ -142,6 +130,6 @@
 <tspan x="392.0" fill="#c9d1d9"> </tspan>
 <tspan x="401.0" fill="#ff8700"> 44%</tspan>
 <tspan x="437.0" fill="#c9d1d9"> </tspan>
-<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">Thu 16 Jul</tspan>
+<tspan x="446.0" fill="#c9d1d9" fill-opacity="0.55">Sat 12 Sep</tspan>
 </text>
 </svg>

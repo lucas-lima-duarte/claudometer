@@ -7,7 +7,7 @@
     {
       "name": "claudometer",
       "source": ".",
-      "description": "A time-paced rate-limit statusline for Claude Code: segmented 5h/7d bars plus a copilot pedal that recommends when to push or ease off. Themes, styles and English/Portuguese."
+      "description": "A time-paced rate-limit statusline for Claude Code: segmented 5h/7d bars whose fill color reads your pacing against the clock. Themes, styles and English/Portuguese."
     }
   ]
 }

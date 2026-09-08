@@ -26,7 +26,7 @@ bash scripts/demo.sh
 ```
 
 To test a single case, pipe a mock on stdin. `resets_at` must be **relative to now** — a fixed
-far-future value always lands at the start of the window, so the pedal never reaches `save it`:
+far-future value always lands at the start of the window, so the paced colors never leave green:
 
 ```bash
 FIVE=$(( $(date +%s) + 9000 )); SEVEN=$(( $(date +%s) + 302400 ))
@@ -45,5 +45,5 @@ CLAUDOMETER_THEME=neon CLAUDOMETER_STYLE=compact claude --plugin-dir .
 - Keep it a single, dependency-light Bash script — only `jq` and `date` may be assumed.
 - **No network calls, ever.** claudometer must stay zero-API / zero-token.
 - Match the existing ANSI-color and glyph style; comments in English.
-- For large features (the copilot pedal, themes, i18n — see the README roadmap), **open an issue
+- For large features (themes, i18n — see the README roadmap), **open an issue
   first** to align on the approach before sending a big PR.

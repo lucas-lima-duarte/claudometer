@@ -63,23 +63,19 @@ esac
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Layer C — i18n. bash 3.2 has no associative arrays → case only.
-# Model names (Sonnet/Haiku) are never translated. Labels should fit 7 display
-# columns; pad_label (below) keeps them aligned even with accents.
+# Labels should fit 7 display columns; pad_label (below) keeps them aligned even
+# with accents.
 # ─────────────────────────────────────────────────────────────────────────────
 t() {
   case "$LANG_SEL" in
     pt)
       case "$1" in
-        boost) echo "acelera" ;; hold) echo "segura" ;; save) echo "economiza" ;;
         lbl_session) echo "Sessão" ;; lbl_5h) echo "5 horas" ;; lbl_weekly) echo "Semana" ;;
-        tag_week) echo "semana" ;; tag_5h) echo "5h" ;;
         effort) echo "effort" ;;
       esac ;;
     *)
       case "$1" in
-        boost) echo "boost it" ;; hold) echo "hold it" ;; save) echo "save it" ;;
         lbl_session) echo "Session" ;; lbl_5h) echo "5-hour" ;; lbl_weekly) echo "Weekly" ;;
-        tag_week) echo "week" ;; tag_5h) echo "5h" ;;
         effort) echo "effort" ;;
       esac ;;
   esac
@@ -246,7 +242,7 @@ build_bar_segs() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Layer D — Pace / pedal (pure functions).
+# Layer D — Pace (pure functions).
 # ─────────────────────────────────────────────────────────────────────────────
 
 # active_segment <reset_epoch> <window_seconds> <n_segs>
@@ -264,66 +260,13 @@ active_segment() {
   echo "$seg"
 }
 
-# pace_state <pct> <n_segs> <active_seg> → boost | hold | save
-#   KEEP THE THRESHOLDS IN SYNC WITH pct_color_paced (same floor/ceil math) so the
-#   pedal never contradicts the bar color of the same window.
-pace_state() {
-  local pct=$1 n=$2 seg=$3 floor ceil
-  if [ "$seg" -lt 0 ]; then
-    if   [ "$pct" -lt 50 ]; then echo boost
-    elif [ "$pct" -lt 75 ]; then echo hold
-    else echo save; fi
-    return
-  fi
-  floor=$(( seg * 100 / n ))
-  ceil=$(( (seg + 1) * 100 / n ))
-  if   [ "$pct" -lt "$floor" ]; then echo boost
-  elif [ "$pct" -le "$ceil" ]; then echo hold
-  else echo save; fi
-}
-
-# pace_severity <state> → 0 boost / 1 hold / 2 save   (for picking the winner)
-pace_severity() {
-  case "$1" in boost) echo 0 ;; hold) echo 1 ;; save) echo 2 ;; *) echo -1 ;; esac
-}
-
-# downgrade_target <model_display_name> → Sonnet | Haiku | /compact
-#   Biggest quota saving first; contextual to the current model.
-downgrade_target() {
-  case "$1" in
-    *Opus*)   echo "Sonnet" ;;
-    *Sonnet*) echo "Haiku" ;;
-    *Haiku*)  echo "/compact" ;;
-    *)        echo "/compact" ;;
-  esac
-}
-
-# pedal_render <state> <conflict_tag> <model>
-#   Emits (via %b): "● ● ●  <word>[ · <tag>][ → <target>]"
-#   The dot at the state's position lights in the state's bright color; the other
-#   two are DIM. Word in the state color. Tag (dim) only on conflict; action (dim,
-#   " → model") only on save.
-pedal_render() {
-  local state=$1 tag=$2 model=$3 d1="$DIM" d2="$DIM" d3="$DIM" wc="$DIM" out
-  case "$state" in
-    boost) d1="$GREEN_BRIGHT";  wc="$GREEN_BRIGHT" ;;
-    hold)  d2="$ORANGE_BRIGHT"; wc="$ORANGE_BRIGHT" ;;
-    save)  d3="$SALMON";        wc="$SALMON" ;;
-  esac
-  out="${d1}●${RESET} ${d2}●${RESET} ${d3}●${RESET}  ${BOLD}${wc}$(t "$state")${RESET}"
-  [ -n "$tag" ] && out="${out} ${DIM}· ${tag}${RESET}"
-  [ "$state" = "save" ] && out="${out} ${DIM}→ $(downgrade_target "$model")${RESET}"
-  printf '%b' "$out"
-}
-
 # render_compact — one-line layout (STYLE=compact). Keeps claudometer's core idea —
-# a paced bar — in miniature: folder, model, the pedal, then a short 10-column gauge
-# (paced color) + % for 5h and 7d. Omits the Session bar for a minimal footprint.
+# a paced bar — in miniature: folder, model, then a short 10-column gauge (paced
+# color) + % for 5h and 7d. Omits the Session bar for a minimal footprint.
 render_compact() {
   local mb
   printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
   [ -n "$MODEL" ]     && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
-  [ -n "$PEDAL_STR" ] && printf "  %b" "$PEDAL_STR"
   if [ -n "$FIVE_H" ]; then
     mb=$(build_bar_segs "$FIVE_H" 1 10 -1 '\033[1;97m' "$BAR_FILL" "$BAR_DIM" "$FIVE_COLOR")
     printf "   ${DIM}5h${RESET} %b %b%s%%${RESET}" "$mb" "$FIVE_COLOR" "$FIVE_H"
@@ -342,49 +285,25 @@ SEVEN_DAY_PCT=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage //
 SEVEN_DAY_RESET=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Layer E — Early pace compute (the pedal must be ready before line 1 prints).
-# Also produces FIVE_H/SEVEN_D/FIVE_ACTIVE_SEG/SEVEN_ACTIVE_SEG reused by the bars.
+# Layer E — Early pace compute. Produces FIVE_H/SEVEN_D and the active segment of
+# each window, reused by the bars below.
 # ─────────────────────────────────────────────────────────────────────────────
 FIVE_H=""; SEVEN_D=""
 FIVE_ACTIVE_SEG=-1; SEVEN_ACTIVE_SEG=-1
-FIVE_STATE=""; SEVEN_STATE=""
 if [ -n "$FIVE_HOUR_PCT" ]; then
   FIVE_H=$(echo "$FIVE_HOUR_PCT" | cut -d. -f1)
   FIVE_ACTIVE_SEG=$(active_segment "$FIVE_HOUR_RESET" 18000 5)
-  FIVE_STATE=$(pace_state "$FIVE_H" 5 "$FIVE_ACTIVE_SEG")
 fi
 if [ -n "$SEVEN_DAY_PCT" ]; then
   SEVEN_D=$(echo "$SEVEN_DAY_PCT" | cut -d. -f1)
   SEVEN_ACTIVE_SEG=$(active_segment "$SEVEN_DAY_RESET" 604800 7)
-  SEVEN_STATE=$(pace_state "$SEVEN_D" 7 "$SEVEN_ACTIVE_SEG")
 fi
 
-# Synthesize one pedal from both windows: the more severe window wins; a dim tag
-# names the winning window only when the two disagree.
-PEDAL_STR=""
-_ped_state=""; _ped_tag=""
-if [ -n "$FIVE_STATE" ] && [ -n "$SEVEN_STATE" ]; then
-  if [ "$(pace_severity "$SEVEN_STATE")" -ge "$(pace_severity "$FIVE_STATE")" ]; then
-    _ped_state="$SEVEN_STATE"; _ped_win=week
-  else
-    _ped_state="$FIVE_STATE";  _ped_win=5h
-  fi
-  if [ "$FIVE_STATE" != "$SEVEN_STATE" ]; then
-    [ "$_ped_win" = week ] && _ped_tag=$(t tag_week) || _ped_tag=$(t tag_5h)
-  fi
-elif [ -n "$FIVE_STATE" ]; then
-  _ped_state="$FIVE_STATE"
-elif [ -n "$SEVEN_STATE" ]; then
-  _ped_state="$SEVEN_STATE"
-fi
-[ -n "$_ped_state" ] && PEDAL_STR=$(pedal_render "$_ped_state" "$_ped_tag" "$MODEL")
-
-# Line 1: folder + model + effort + pedal (stacked styles; compact renders separately)
+# Line 1: folder + model + effort (stacked styles; compact renders separately)
 if [ "$STYLE" != "compact" ]; then
   printf "${CYAN}${BOLD}%s${RESET}" "$CWD"
   [ -n "$MODEL" ] && printf "  ${BOLD}${MODEL_COLOR}%s${RESET}" "$MODEL"
   [ -n "$EFFORT" ] && printf "  ${BOLD}${MODEL_COLOR}%s $(t effort)${RESET}" "$EFFORT"
-  [ -n "$PEDAL_STR" ] && printf "   %b" "$PEDAL_STR"
   printf "\n"
 fi
 
