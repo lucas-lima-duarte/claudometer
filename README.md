@@ -1,13 +1,12 @@
 # claudometer
 
-**A time-paced rate-limit statusline for Claude Code** — bars that double as a clock, plus a
-copilot pedal that tells you when to push or ease off.
+**A time-paced rate-limit statusline for Claude Code** — bars that double as a clock.
 
 ![claudometer](docs/hero.svg)
 
 Most usage statuslines show you a number. claudometer shows it **against the clock**: the 5-hour
 and 7-day bars are split into time segments, so you can see at a glance whether you're *ahead of
-pace*, *on pace*, or *burning too fast* — and the pedal (`● ● ●`) recommends what to do about it.
+pace*, *on pace*, or *burning too fast*.
 
 ## Bars that are also a clock
 
@@ -23,21 +22,6 @@ highlights the segment for *right now*, and colors the fill by **pace**:
 
 So a bar that's 60% full isn't automatically bad: 4 days into the weekly window, 60% is *ahead*
 (green); one hour into the 5-hour window, the same 60% is *behind* (red).
-
-## The copilot pedal
-
-Every other statusline just *shows* the number. claudometer also tells you **what to do**. The
-`● ● ●` on line 1 is a three-position pedal — the lit dot is where you are:
-
-| Pedal | Meaning | Suggests |
-| :---- | :------ | :------- |
-| **boost it** (green) | ahead of pace — quota to spare | push harder |
-| **hold it** (orange) | on pace | keep going |
-| **save it** (red) | burning too fast | ease off → a cheaper model |
-
-It synthesizes **both** windows into one recommendation: the more-severe window wins, with a dim
-tag (` · 5h` / ` · week`) when they disagree. On `save it`, the arrow suggests the biggest quota
-saving for your current model (`→ Sonnet` / `→ Haiku` / `→ /compact`).
 
 ## Themes
 
@@ -136,7 +120,7 @@ tokens** — Claude Code pipes the session JSON to it on stdin and renders whate
 
 - **More palettes** — Gruvbox / Solarized / Tokyo Night / Catppuccin.
 - **Multi-profile indicator** — show which `CLAUDE_CONFIG_DIR` profile is active, generically.
-- **Punchier copy** — more characterful wording for the pedal and labels.
+- **Punchier copy** — more characterful wording for the labels.
 
 ## Contributing
 

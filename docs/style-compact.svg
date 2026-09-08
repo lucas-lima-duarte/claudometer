@@ -1,51 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="874" height="72" viewBox="0 0 874 72" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15">
-<rect width="874" height="72" rx="8" fill="#0d1117"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="577" height="72" viewBox="0 0 577 72" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15">
+<rect width="577" height="72" rx="8" fill="#0d1117"/>
 <text x="14.0" y="25.0" font-size="12" fill="#6e7681">style: compact</text>
 <text y="51" xml:space="preserve">
 <tspan x="14.0" fill="#4ec9b0" font-weight="bold">claudometer</tspan>
 <tspan x="113.0" fill="#c9d1d9">  </tspan>
 <tspan x="131.0" fill="#ff8700" font-weight="bold">Opus 4.8</tspan>
-<tspan x="203.0" fill="#c9d1d9">  </tspan>
-<tspan x="221.0" fill="#c9d1d9" fill-opacity="0.55">●</tspan>
-<tspan x="239.0" fill="#c9d1d9"> </tspan>
-<tspan x="248.0" fill="#c9d1d9" fill-opacity="0.55">●</tspan>
-<tspan x="266.0" fill="#c9d1d9"> </tspan>
-<tspan x="275.0" fill="#ff8787">●</tspan>
-<tspan x="293.0" fill="#c9d1d9">  </tspan>
-<tspan x="311.0" fill="#ff8787" font-weight="bold">save it</tspan>
-<tspan x="374.0" fill="#c9d1d9"> </tspan>
-<tspan x="383.0" fill="#c9d1d9" fill-opacity="0.55">· 5h</tspan>
+<tspan x="203.0" fill="#c9d1d9">   </tspan>
+<tspan x="230.0" fill="#c9d1d9" fill-opacity="0.55">5h</tspan>
+<tspan x="248.0" fill="#c9d1d9"> </tspan>
+<tspan x="257.0" fill="#f44747">━</tspan>
+<tspan x="266.0" fill="#f44747">━</tspan>
+<tspan x="275.0" fill="#f44747">━</tspan>
+<tspan x="284.0" fill="#f44747">━</tspan>
+<tspan x="293.0" fill="#f44747">━</tspan>
+<tspan x="302.0" fill="#f44747">━</tspan>
+<tspan x="311.0" fill="#f44747">━</tspan>
+<tspan x="320.0" fill="#f44747">━</tspan>
+<tspan x="329.0" fill="#f44747" fill-opacity="0.55">─</tspan>
+<tspan x="338.0" fill="#f44747" fill-opacity="0.55">─</tspan>
+<tspan x="347.0" fill="#c9d1d9"> </tspan>
+<tspan x="356.0" fill="#f44747">80%</tspan>
+<tspan x="383.0" fill="#c9d1d9">  </tspan>
+<tspan x="401.0" fill="#c9d1d9" fill-opacity="0.55">7d</tspan>
 <tspan x="419.0" fill="#c9d1d9"> </tspan>
-<tspan x="428.0" fill="#c9d1d9" fill-opacity="0.55">→ Sonnet</tspan>
-<tspan x="500.0" fill="#c9d1d9">   </tspan>
-<tspan x="527.0" fill="#c9d1d9" fill-opacity="0.55">5h</tspan>
-<tspan x="545.0" fill="#c9d1d9"> </tspan>
-<tspan x="554.0" fill="#f44747">━</tspan>
-<tspan x="563.0" fill="#f44747">━</tspan>
-<tspan x="572.0" fill="#f44747">━</tspan>
-<tspan x="581.0" fill="#f44747">━</tspan>
-<tspan x="590.0" fill="#f44747">━</tspan>
-<tspan x="599.0" fill="#f44747">━</tspan>
-<tspan x="608.0" fill="#f44747">━</tspan>
-<tspan x="617.0" fill="#f44747">━</tspan>
-<tspan x="626.0" fill="#f44747" fill-opacity="0.55">─</tspan>
-<tspan x="635.0" fill="#f44747" fill-opacity="0.55">─</tspan>
-<tspan x="644.0" fill="#c9d1d9"> </tspan>
-<tspan x="653.0" fill="#f44747">80%</tspan>
-<tspan x="680.0" fill="#c9d1d9">  </tspan>
-<tspan x="698.0" fill="#c9d1d9" fill-opacity="0.55">7d</tspan>
-<tspan x="716.0" fill="#c9d1d9"> </tspan>
-<tspan x="725.0" fill="#ff8700">━</tspan>
-<tspan x="734.0" fill="#ff8700">━</tspan>
-<tspan x="743.0" fill="#ff8700">━</tspan>
-<tspan x="752.0" fill="#ff8700">━</tspan>
-<tspan x="761.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="770.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="779.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="788.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="797.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="806.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
-<tspan x="815.0" fill="#c9d1d9"> </tspan>
-<tspan x="824.0" fill="#ff8700">44%</tspan>
+<tspan x="428.0" fill="#ff8700">━</tspan>
+<tspan x="437.0" fill="#ff8700">━</tspan>
+<tspan x="446.0" fill="#ff8700">━</tspan>
+<tspan x="455.0" fill="#ff8700">━</tspan>
+<tspan x="464.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="473.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="482.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="491.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="500.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="509.0" fill="#ff8700" fill-opacity="0.55">─</tspan>
+<tspan x="518.0" fill="#c9d1d9"> </tspan>
+<tspan x="527.0" fill="#ff8700">44%</tspan>
 </text>
 </svg>
