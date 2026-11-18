@@ -98,6 +98,9 @@ All optional; with none you get `fuel` + `segmented` + `en`.
 | `CLAUDOMETER_STYLE` | `segmented` · `blocks` · `compact` | `segmented` | bar layout |
 | `CLAUDOMETER_LANG`  | `en` · `pt` | `$LANG` prefix, else `en` | language |
 
+**Disk column.** Next to the bars, claudometer shows the free space of the main volume and of each
+external volume under `/Volumes`. Run `/claudometer:disk` to hide or show it.
+
 Example — Dracula palette, compact layout, in Portuguese:
 
 ```json

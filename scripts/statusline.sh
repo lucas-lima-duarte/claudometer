@@ -345,14 +345,54 @@ if [ -n "$SEVEN_DAY_PCT" ]; then
     "$(pad_label "$(t lbl_weekly)" 7)" "$SEVEN_BAR" "$SEVEN_COLOR" "$SEVEN_D" "$SEVEN_RESET_STR")
 fi
 
+# Disk — free space, bar-less, in a right-hand column next to the stacked bars:
+# the main volume on the Session line, each external volume (/Volumes/*) on the
+# lines below it. Hide/show with /claudometer:disk (flag file present = hidden).
+# used% = 1 - avail/total: APFS volumes share a container, so df's "Used" undercounts.
+disk_seg() {
+  local label=$1 mnt=$2 total avail pct
+  read -r total avail < <(df -kP "$mnt" 2>/dev/null | awk 'NR==2 {print $2, $4}')
+  { [ -z "$total" ] || [ "$total" -eq 0 ]; } && return
+  pct=$(( 100 - avail * 100 / total ))
+  printf "${ORANGE}%-5s\033[0m %b%3s%%\033[0m \033[2m%sG free\033[0m" \
+    "$label" "$(pct_color "$pct")" "$pct" "$(( avail / 1048576 ))"
+}
+DISK_SEGS=()
+if [ ! -e "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/state/claudometer-disk-hidden" ]; then
+  _main_mnt=/; [ -d /System/Volumes/Data ] && _main_mnt=/System/Volumes/Data   # macOS user data
+  _seg=$(disk_seg "Main" "$_main_mnt"); [ -n "$_seg" ] && DISK_SEGS+=("$_seg")
+  for _vol in /Volumes/*; do
+    [ -d "$_vol" ] && [ ! -L "$_vol" ] || continue   # the boot volume is a symlink to /
+    _seg=$(disk_seg "$(basename "$_vol" | cut -c1-5)" "$_vol"); [ -n "$_seg" ] && DISK_SEGS+=("$_seg")
+  done
+fi
+
+# disk_col <line_index> <visible_width_of_reset_suffix> — the disk column for that bar
+# line, padded so the column starts aligned. The last bar line takes any leftovers.
+DISK_COL_W=11   # widest reset suffix: " Fri 20 Nov"
+disk_col() {
+  local i=$1 used=$2 last=$3 out="" j
+  [ "$i" -ge "${#DISK_SEGS[@]}" ] && return
+  printf '%*s   ' $(( DISK_COL_W - used )) ''
+  if [ "$i" = "$last" ]; then
+    for (( j=i; j<${#DISK_SEGS[@]}; j++ )); do out="${out}${DISK_SEGS[$j]}   "; done
+    printf '%s' "${out%   }"
+  else
+    printf '%s' "${DISK_SEGS[$i]}"
+  fi
+}
+
 # Layer F — output per style. segmented/blocks share the stacked layout (bar glyphs
 # already differ via BAR_FILL/BAR_DIM/BAR_DIV); compact is a single line.
 if [ "$STYLE" = "compact" ]; then
   render_compact
 else
-  printf '%s\n' "$SESSION_SEG"
-  [ -n "$FIVE_SEG" ]  && printf '%s\n' "$FIVE_SEG"
-  [ -n "$SEVEN_SEG" ] && printf '%s\n' "$SEVEN_SEG"
+  _last=0; [ -n "$FIVE_SEG" ] && _last=1; [ -n "$SEVEN_SEG" ] && _last=2
+  _fw=0; [ -n "$FIVE_RESET_STR" ]  && _fw=$(( ${#_fdate} + 1 ))
+  _sw=0; [ -n "$SEVEN_RESET_STR" ] && _sw=$(( ${#_sdate} + 1 ))
+  printf '%s\n' "$SESSION_SEG$(disk_col 0 0 "$_last")"
+  [ -n "$FIVE_SEG" ]  && printf '%s\n' "$FIVE_SEG$(disk_col 1 "$_fw" "$_last")"
+  [ -n "$SEVEN_SEG" ] && printf '%s\n' "$SEVEN_SEG$(disk_col 2 "$_sw" "$_last")"
 fi
 
 # Force exit 0 — in a fresh session without rate_limits, the last `[ -n ... ] &&`
